@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import Navbar from './components/layout/Navbar';
 import Users from './components/users/Users';
 import Search from './components/users/Search';
+import Alert from "./components/layout/Alert";
 import axios from 'axios';
 import PropTypes from 'prop-types';
 import './App.css';
@@ -12,7 +13,8 @@ class App extends Component {
     users: [],
     loading: false,
     searchUsers: [],
-    clearUsers: []
+    clearUsers: [],
+    alert: null
   }
 
   static propTypes = {
@@ -28,6 +30,7 @@ class App extends Component {
   //
   // }
 
+  // search users
   searchUsers = async (text) => {
     this.setState({loading: true});
     const res = await axios.get(`https://api.github.com/search/users?q=${text}&client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`);
@@ -35,8 +38,14 @@ class App extends Component {
     this.setState({users: res.data.items, loading: false});
   }
 
+  // clear users
   clearUsers = () => this.setState({users:[], loading: false});
 
+  // set alert
+  setAlert = (msg, type) => {
+    this.setState({alert: { msg, type }});
+    setTimeout( () =>  this.setState({alert: null}), 5000)
+  };
 
   render() {
 
@@ -46,7 +55,13 @@ class App extends Component {
       <div className="App">
         <Navbar /> 
         <div className='container'>
-          <Search searchUsers={this.searchUsers} clearUsers={this.clearUsers} showClear={users.length > 0 ? true : false}/>
+          <Alert alert={this.state.alert} />
+          <Search
+              searchUsers={this.searchUsers}
+              clearUsers={this.clearUsers}
+              showClear={users.length > 0 ? true : false}
+              setAlert={this.setAlert}
+          />
           <Users loading={loading} users={users} />
         </div>         
       </div>
